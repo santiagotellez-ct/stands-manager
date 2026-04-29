@@ -38,7 +38,7 @@ export default async function StandDetailPage() {
     <div className="max-w-[1000px] mx-auto pb-20 space-y-8">
       <PageHeader 
         title="Detalle del stand" 
-        description={stand.stand_types?.name}
+        description={(stand.stand_types as any)?.name}
         action={
           <Link href="/home">
             <Button variant="outline">Volver</Button>

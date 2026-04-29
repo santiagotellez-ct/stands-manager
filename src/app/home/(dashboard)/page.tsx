@@ -62,7 +62,7 @@ export default async function CompanyDashboardPage() {
                     <img src={stand.general_photo_url} alt="Stand" className="w-full h-48 object-cover" />
                   </div>
                 )}
-                <h3 className="text-xl font-semibold mb-2">{stand.stand_types?.name}</h3>
+                <h3 className="text-xl font-semibold mb-2">{(stand.stand_types as any)?.name}</h3>
                 <div className="mb-6">
                   {stand.computed_status === 'pending_delivery' && <Badge variant="outline" className="text-neutral-500">Falta firmar recepción</Badge>}
                   {stand.computed_status === 'delivered' && <Badge variant="outline" className="text-blue-500 border-blue-200 bg-blue-50">Recepción firmada</Badge>}

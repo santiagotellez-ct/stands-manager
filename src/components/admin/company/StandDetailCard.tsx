@@ -118,7 +118,7 @@ export function StandDetailCard({ companyId, stand, status, elements }: { compan
         <CardContent className="pt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h3 className="font-semibold text-lg text-brand">{stand.stand_types?.name}</h3>
+              <h3 className="font-semibold text-lg text-brand">{(stand.stand_types as any)?.name}</h3>
               {getStatusBadge()}
             </div>
             <p className="text-sm text-neutral-600">

@@ -118,7 +118,7 @@ export default async function AdminDashboardPage() {
                         {stand.users?.name || 'Empresa eliminada'}
                       </Link>
                     </TableCell>
-                    <TableCell>{stand.stand_types?.name}</TableCell>
+                    <TableCell>{(stand.stand_types as any)?.name}</TableCell>
                     <TableCell>{getStatusBadge(stand.computed_status)}</TableCell>
                     <TableCell>{new Date(stand.assigned_at).toLocaleDateString()}</TableCell>
                   </TableRow>

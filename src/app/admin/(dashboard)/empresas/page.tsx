@@ -145,7 +145,7 @@ export default async function CompaniesPage({
                     <TableCell>{company.email}</TableCell>
                     <TableCell>
                       {stand?.stand_types?.name ? (
-                        <span className="text-sm">{stand.stand_types.name}</span>
+                        <span className="text-sm">{(stand.stand_types as any)?.name}</span>
                       ) : (
                         <span className="text-sm text-neutral-400">Sin asignar</span>
                       )}
