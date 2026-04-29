@@ -56,11 +56,11 @@ export function DeleteStandTypeButton({ id, standsCount }: { id: string; standsC
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
+      <AlertDialogTrigger render={
         <Button variant="destructive">
           <Trash2 className="mr-2 h-4 w-4" /> Eliminar tipo de stand
         </Button>
-      </AlertDialogTrigger>
+      } />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>

@@ -52,7 +52,7 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
     watch,
     formState: { errors },
   } = useForm<StandTypeFormValues>({
-    resolver: zodResolver(standTypeSchema),
+    resolver: zodResolver(standTypeSchema) as any,
     defaultValues: initialData || {
       name: '',
       description: '',

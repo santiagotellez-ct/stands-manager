@@ -56,11 +56,11 @@ export function DeleteCompanySection({ company }: { company: any }) {
           </div>
           
           <AlertDialog>
-            <AlertDialogTrigger asChild>
+            <AlertDialogTrigger render={
               <Button variant="destructive">
                 <Trash2 className="mr-2 h-4 w-4" /> Eliminar empresa
               </Button>
-            </AlertDialogTrigger>
+            } />
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>¿Estás completamente seguro?</AlertDialogTitle>

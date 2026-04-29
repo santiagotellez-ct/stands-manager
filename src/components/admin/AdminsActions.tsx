@@ -55,11 +55,11 @@ export function AdminsActions({ admin, totalAdmins }: { admin: any; totalAdmins:
   return (
     <div title={tooltipMessage}>
       <AlertDialog>
-        <AlertDialogTrigger asChild>
+        <AlertDialogTrigger render={
           <Button variant="ghost" size="sm" disabled={disabled} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
             <Trash2 className="h-4 w-4" />
           </Button>
-        </AlertDialogTrigger>
+        } />
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar administrador?</AlertDialogTitle>

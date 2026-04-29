@@ -20,7 +20,8 @@ export function AssignStandCard({ companyId, standTypes }: { companyId: string, 
   const [returnDate, setReturnDate] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleTypeChange = (val: string) => {
+  const handleTypeChange = (val: string | null) => {
+    if (!val) return;
     setSelectedType(val);
     const type = standTypes.find(t => t.id === val);
     if (type && type.default_return_available_at) {

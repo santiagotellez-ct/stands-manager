@@ -127,9 +127,9 @@ export function StandDetailCard({ companyId, stand, status, elements }: { compan
           </div>
           <div className="flex gap-2">
             <AlertDialog>
-              <AlertDialogTrigger asChild>
+              <AlertDialogTrigger render={
                 <Button variant="outline" size="sm">Editar fecha de devolución</Button>
-              </AlertDialogTrigger>
+              } />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Editar fecha de devolución</AlertDialogTitle>
@@ -148,11 +148,11 @@ export function StandDetailCard({ companyId, stand, status, elements }: { compan
             </AlertDialog>
 
             <AlertDialog>
-              <AlertDialogTrigger asChild>
+              <AlertDialogTrigger render={
                 <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20" disabled={stand.signed_at !== null}>
                   Desasignar
                 </Button>
-              </AlertDialogTrigger>
+              } />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>¿Desasignar stand?</AlertDialogTitle>

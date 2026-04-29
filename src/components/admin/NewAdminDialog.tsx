@@ -60,11 +60,11 @@ export function NewAdminDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button className="bg-brand hover:bg-brand-hover text-white">
           <Plus className="mr-2 h-4 w-4" /> Nuevo admin
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Crear administrador</DialogTitle>

@@ -126,11 +126,11 @@ export function ReturnUploadForm({ standId, elements }: { standId: string, eleme
 
       <div className="flex justify-end pt-4">
         <AlertDialog>
-          <AlertDialogTrigger asChild>
+          <AlertDialogTrigger render={
             <Button size="lg" className="bg-brand hover:bg-brand-hover text-white w-full sm:w-auto" disabled={!isAllCompleted || isSubmitting}>
               Completar devolución
             </Button>
-          </AlertDialogTrigger>
+          } />
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>¿Completar devolución?</AlertDialogTitle>

@@ -88,11 +88,11 @@ export function SignatureSection({ standId }: { standId: string }) {
           </Button>
           
           <AlertDialog>
-            <AlertDialogTrigger asChild>
+            <AlertDialogTrigger render={
               <Button className="bg-brand hover:bg-brand-hover text-white" disabled={isSubmitting}>
                 Confirmar recepción
               </Button>
-            </AlertDialogTrigger>
+            } />
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>¿Confirmar recepción?</AlertDialogTitle>
