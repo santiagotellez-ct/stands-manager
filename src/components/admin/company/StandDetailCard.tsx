@@ -261,6 +261,7 @@ export function StandDetailCard({ companyId, stand, status, elements }: { compan
                   <div>
                     <h4 className="font-medium text-neutral-900">{el.name}</h4>
                     <p className="text-sm text-neutral-500">Cantidad: {el.quantity}</p>
+                    {el.notes && <p className="text-sm text-neutral-500 italic mt-1 line-clamp-2">{el.notes}</p>}
                   </div>
                 </div>
 
