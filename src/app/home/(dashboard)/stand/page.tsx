@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { SignatureSection } from '@/components/company/SignatureSection';
+import { ElementDetailList } from '@/components/company/ElementDetailList';
 
 export const revalidate = 0;
 
@@ -56,26 +57,7 @@ export default async function StandDetailPage() {
       {/* Elementos */}
       <div>
         <h3 className="text-xl font-semibold mb-4">Elementos incluidos</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {elements?.map((el: any) => (
-            <Card key={el.id} className="flex flex-row overflow-hidden shadow-sm border-neutral-200 items-center p-3 gap-4">
-              {el.delivery_photo_url ? (
-                <div className="w-32 md:w-48 shrink-0 aspect-video bg-neutral-100 rounded-md overflow-hidden">
-                  <img src={el.delivery_photo_url} alt={el.name} className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="w-32 md:w-48 shrink-0 aspect-video bg-neutral-100 rounded-md flex items-center justify-center text-xs text-neutral-400">
-                  Sin foto
-                </div>
-              )}
-              <div className="flex-1 flex flex-col justify-center">
-                <h4 className="font-semibold text-base md:text-lg">{el.name}</h4>
-                <p className="text-sm text-neutral-600 mb-1">Cantidad: {el.quantity}</p>
-                {el.notes && <p className="text-sm text-neutral-500 italic line-clamp-2">"{el.notes}"</p>}
-              </div>
-            </Card>
-          ))}
-        </div>
+        <ElementDetailList elements={elements || []} />
       </div>
 
       {/* Firma */}

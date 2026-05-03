@@ -205,7 +205,7 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
           Cancelar
         </Button>
         <Button type="submit" className="bg-brand hover:bg-brand-hover text-white" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : 'Guardar tipo de stand'}
+          {isLoading ? (initialData?.id ? 'Guardando...' : 'Creando...') : (initialData?.id ? 'Guardar cambios' : 'Crear stand')}
         </Button>
       </div>
     </form>
