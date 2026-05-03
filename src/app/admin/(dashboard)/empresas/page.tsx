@@ -42,7 +42,7 @@ export default async function CompaniesPage({
     .eq('role', 'company');
 
   if (q) {
-    query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%`);
+    query = query.ilike('name', `%${q}%`);
   }
 
   // Supabase postgrest doesn't easily allow filtering by whether a joined table exists natively in the same query without an inner join.
@@ -87,7 +87,7 @@ export default async function CompaniesPage({
           <Input 
             name="q" 
             defaultValue={q} 
-            placeholder="Buscar por nombre o correo..." 
+            placeholder="Buscar por nombre de empresa..." 
             className="pl-9"
           />
           {filter && <input type="hidden" name="filter" value={filter} />}
@@ -126,7 +126,7 @@ export default async function CompaniesPage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
+                <TableHead>Usuario / Nombre</TableHead>
                 <TableHead>Correo</TableHead>
                 <TableHead>Stand asignado</TableHead>
                 <TableHead>Estado</TableHead>
@@ -142,7 +142,7 @@ export default async function CompaniesPage({
                 return (
                   <TableRow key={company.id}>
                     <TableCell className="font-medium">{company.name}</TableCell>
-                    <TableCell>{company.email}</TableCell>
+                    <TableCell className="text-sm text-neutral-500">{company.email || '—'}</TableCell>
                     <TableCell>
                       {stand?.stand_types?.name ? (
                         <span className="text-sm">{(stand.stand_types as any)?.name}</span>

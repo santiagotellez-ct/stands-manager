@@ -15,8 +15,8 @@ import { z } from 'zod';
 import { createCompany } from './actions';
 
 const newCompanySchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string().email('Correo inválido'),
+  name: z.string().min(2, 'El nombre/usuario debe tener al menos 2 caracteres'),
+  email: z.string().email('Correo inválido').optional().or(z.literal('')),
   password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
@@ -36,7 +36,7 @@ export default function NewCompanyPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<NewCompanyFormValues>({
-    resolver: zodResolver(newCompanySchema),
+    resolver: zodResolver(newCompanySchema) as any,
   });
 
   const onSubmit = async (data: NewCompanyFormValues) => {
@@ -74,12 +74,13 @@ export default function NewCompanyPage() {
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre de la empresa *</Label>
-              <Input id="name" placeholder="Ej: TechCorp S.A." {...register('name')} />
+              <Label htmlFor="name">Nombre / Usuario de la empresa *</Label>
+              <Input id="name" placeholder="Ej: TechCorp" {...register('name')} />
+              <p className="text-xs text-neutral-500">Este será el nombre de usuario para iniciar sesión. Debe ser único.</p>
               {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico *</Label>
+              <Label htmlFor="email">Correo electrónico (opcional)</Label>
               <Input id="email" type="email" placeholder="empresa@ejemplo.com" {...register('email')} />
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>

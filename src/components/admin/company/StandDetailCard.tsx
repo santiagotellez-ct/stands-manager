@@ -22,6 +22,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { unassignStand, updateReturnDate } from '@/app/admin/(dashboard)/empresas/[id]/actions';
+import { AdminSignatureSection } from '@/components/admin/company/AdminSignatureSection';
 
 export function StandDetailCard({ companyId, stand, status, elements }: { companyId: string, stand: any, status: string, elements: any[] }) {
   const supabase = createClient();
@@ -221,7 +222,7 @@ export function StandDetailCard({ companyId, stand, status, elements }: { compan
               </div>
             </div>
           ) : (
-            <p className="text-sm text-neutral-500 italic">Pendiente de firma de recepción por la empresa.</p>
+            <AdminSignatureSection standId={stand.id} companyId={companyId} />
           )}
         </CardContent>
       </Card>

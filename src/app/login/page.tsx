@@ -12,9 +12,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { loginWithUsername } from './actions';
 
 const loginSchema = z.object({
-  email: z.string().email('Correo inválido'),
+  username: z.string().min(1, 'El usuario es requerido'),
   password: z.string().min(1, 'La contraseña es requerida'),
 });
 
@@ -31,14 +32,24 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema) as any,
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
+      // Get the internal email for this username via server action
+      const result = await loginWithUsername(data.username);
+      
+      if (result.error) {
+        toast.error('Error al iniciar sesión', { description: result.error });
+        setIsLoading(false);
+        return;
+      }
+
+      // Sign in with the internal email
       const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
+        email: result.email!,
         password: data.password,
       });
 
@@ -55,7 +66,7 @@ export default function LoginPage() {
         }
       }
     } catch (error: any) {
-      toast.error('Error al iniciar sesión', { description: error.message || 'Credenciales inválidas' });
+      toast.error('Error al iniciar sesión', { description: 'Usuario o contraseña incorrectos' });
     } finally {
       setIsLoading(false);
     }
@@ -65,9 +76,9 @@ export default function LoginPage() {
     <AuthLayout title="Iniciar sesión" subtitle="Accede a tu panel de stand">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Correo electrónico</Label>
-          <Input id="email" type="email" placeholder="empresa@ejemplo.com" {...register('email')} />
-          {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+          <Label htmlFor="username">Usuario (nombre de empresa)</Label>
+          <Input id="username" type="text" placeholder="Nombre de empresa" {...register('username')} />
+          {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
         </div>
         <div className="space-y-2 relative">
           <Label htmlFor="password">Contraseña</Label>

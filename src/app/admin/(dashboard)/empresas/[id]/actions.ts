@@ -3,8 +3,37 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
+function usernameToEmail(username: string): string {
+  const sanitized = username.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return `${sanitized}@stands.internal`;
+}
+
 export async function updateCompanyInfo(id: string, data: any) {
   try {
+    const newName = data.name?.trim();
+
+    // If name changed, check uniqueness
+    if (newName) {
+      const { data: existing } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('role', 'company')
+        .ilike('name', newName)
+        .neq('id', id)
+        .maybeSingle();
+
+      if (existing) {
+        return { error: 'Ya existe una empresa con ese nombre/usuario.' };
+      }
+
+      // Update auth email to match new username
+      const newInternalEmail = usernameToEmail(newName);
+      const { error: emailError } = await supabaseAdmin.auth.admin.updateUserById(id, {
+        email: newInternalEmail,
+      });
+      if (emailError) throw emailError;
+    }
+
     if (data.password) {
       const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(id, {
         password: data.password
@@ -13,7 +42,8 @@ export async function updateCompanyInfo(id: string, data: any) {
     }
 
     const { error: updateError } = await supabaseAdmin.from('users').update({
-      name: data.name,
+      name: newName || data.name,
+      email: data.email || null,
     }).eq('id', id);
 
     if (updateError) throw updateError;
@@ -94,6 +124,23 @@ export async function updateStandElementNotes(elementId: string, companyId: stri
     if (error) throw error;
     
     revalidatePath(`/admin/empresas/${companyId}`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
+
+export async function adminSignStandReception(standId: string, signatureUrl: string, companyId: string) {
+  try {
+    const { error } = await supabaseAdmin.from('stands').update({
+      delivery_signature_url: signatureUrl,
+      signed_at: new Date().toISOString()
+    }).eq('id', standId);
+
+    if (error) throw error;
+
+    revalidatePath(`/admin/empresas/${companyId}`);
+    revalidatePath('/admin');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };

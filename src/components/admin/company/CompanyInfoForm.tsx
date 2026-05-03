@@ -14,7 +14,7 @@ import { updateCompanyInfo } from '@/app/admin/(dashboard)/empresas/[id]/actions
 
 const updateCompanySchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string().email(),
+  email: z.string().email('Correo inválido').optional().or(z.literal('')),
   password: z.string().optional(),
   confirmPassword: z.string().optional()
 }).refine((data) => {
@@ -36,10 +36,10 @@ export function CompanyInfoForm({ company }: { company: any }) {
     handleSubmit,
     formState: { errors },
   } = useForm<UpdateCompanyValues>({
-    resolver: zodResolver(updateCompanySchema),
+    resolver: zodResolver(updateCompanySchema) as any,
     defaultValues: {
       name: company.name,
-      email: company.email,
+      email: company.email || '',
     }
   });
 
@@ -68,13 +68,15 @@ export function CompanyInfoForm({ company }: { company: any }) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre</Label>
+              <Label htmlFor="name">Nombre / Usuario</Label>
               <Input id="name" {...register('name')} />
+              <p className="text-xs text-neutral-500">Este es el usuario para iniciar sesión.</p>
               {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Correo (no editable)</Label>
-              <Input id="email" {...register('email')} disabled className="bg-neutral-50" />
+              <Label htmlFor="email">Correo electrónico (opcional)</Label>
+              <Input id="email" type="email" placeholder="empresa@ejemplo.com" {...register('email')} />
+              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-2 relative">
               <Label htmlFor="password">Nueva contraseña (opcional)</Label>
