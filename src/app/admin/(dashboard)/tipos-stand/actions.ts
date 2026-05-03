@@ -87,6 +87,11 @@ export async function saveStandType(id: string | undefined, data: any) {
       // 4. SYNC TO EXISTING STANDS - improved to handle name/description/quantity changes
       const { data: stands } = await supabaseAdmin.from('stands').select('id, company_id').eq('stand_type_id', typeId);
       if (stands && stands.length > 0) {
+        // Sync return date to all assigned stands
+        const newReturnDate = data.default_return_available_at || null;
+        await supabaseAdmin.from('stands').update({
+          return_available_at: newReturnDate,
+        }).eq('stand_type_id', typeId);
         // Build mapping: for elements that existed before, map old name -> new data
         // Elements with an existing ID had an old name we can track
         const renamedElements: Array<{ oldName: string; newName: string; quantity: number; description: string | null; sortOrder: number }> = [];
