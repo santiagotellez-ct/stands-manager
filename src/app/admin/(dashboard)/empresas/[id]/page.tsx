@@ -70,7 +70,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
     <div className="max-w-[1000px] mx-auto pb-20 space-y-8">
       <PageHeader 
         title={`Empresa: ${company.name}`} 
-        description={company.email || 'Sin correo registrado'} 
+        description={company.email && !company.email.endsWith('@stands.internal') ? company.email : 'Sin correo registrado'} 
       />
 
       {/* 1. Información de la empresa */}

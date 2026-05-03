@@ -142,7 +142,7 @@ export default async function CompaniesPage({
                 return (
                   <TableRow key={company.id}>
                     <TableCell className="font-medium">{company.name}</TableCell>
-                    <TableCell className="text-sm text-neutral-500">{company.email || '—'}</TableCell>
+                    <TableCell className="text-sm text-neutral-500">{company.email && !company.email.endsWith('@stands.internal') ? company.email : '—'}</TableCell>
                     <TableCell>
                       {stand?.stand_types?.name ? (
                         <span className="text-sm">{(stand.stand_types as any)?.name}</span>

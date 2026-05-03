@@ -41,9 +41,10 @@ export async function updateCompanyInfo(id: string, data: any) {
       if (authError) throw authError;
     }
 
+    const finalName = newName || data.name;
     const { error: updateError } = await supabaseAdmin.from('users').update({
-      name: newName || data.name,
-      email: data.email || null,
+      name: finalName,
+      email: data.email || usernameToEmail(finalName),
     }).eq('id', id);
 
     if (updateError) throw updateError;
@@ -87,11 +88,23 @@ export async function unassignStand(standId: string, companyId: string) {
 
 export async function deleteCompany(id: string) {
   try {
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
-    if (error && !error.message.includes('User not found')) throw error;
-    
+    // 1. Delete stand elements for any stands owned by this company
+    const { data: stands } = await supabaseAdmin.from('stands').select('id').eq('company_id', id);
+    if (stands && stands.length > 0) {
+      const standIds = stands.map(s => s.id);
+      await supabaseAdmin.from('stand_elements').delete().in('stand_id', standIds);
+    }
+
+    // 2. Delete stands owned by this company
+    await supabaseAdmin.from('stands').delete().eq('company_id', id);
+
+    // 3. Delete user row from public.users
     const { error: dbError } = await supabaseAdmin.from('users').delete().eq('id', id);
     if (dbError) throw dbError;
+
+    // 4. Delete from Supabase Auth
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
+    if (authError && !authError.message.includes('User not found')) throw authError;
     
     revalidatePath('/admin/empresas');
     return { success: true };

@@ -39,7 +39,7 @@ export function CompanyInfoForm({ company }: { company: any }) {
     resolver: zodResolver(updateCompanySchema) as any,
     defaultValues: {
       name: company.name,
-      email: company.email || '',
+      email: company.email && !company.email.endsWith('@stands.internal') ? company.email : '',
     }
   });
 

@@ -84,7 +84,7 @@ export async function saveStandType(id: string | undefined, data: any) {
         .upsert(elementsToUpsert, { onConflict: 'id' });
       if (elError) throw elError;
 
-      // 4. SYNC TO EXISTING STANDS
+      // 4. SYNC TO EXISTING STANDS - improved to handle name/description/quantity changes
       const { data: stands } = await supabaseAdmin.from('stands').select('id, company_id').eq('stand_type_id', typeId);
       if (stands && stands.length > 0) {
         // Sync return date to all assigned stands
@@ -92,17 +92,18 @@ export async function saveStandType(id: string | undefined, data: any) {
         await supabaseAdmin.from('stands').update({
           return_available_at: newReturnDate,
         }).eq('stand_type_id', typeId);
-
-        // Build old name -> new data map using template element IDs
-        const renamedMap: Array<{ oldName: string; newName: string; quantity: number; description: string | null; sortOrder: number }> = [];
+        // Build mapping: for elements that existed before, map old name -> new data
+        // Elements with an existing ID had an old name we can track
+        const renamedElements: Array<{ oldName: string; newName: string; quantity: number; description: string | null; sortOrder: number }> = [];
         const brandNewElements: Array<{ name: string; quantity: number; description: string | null; deliveryPhotoUrl: string | null; sortOrder: number }> = [];
 
         for (let idx = 0; idx < data.elements.length; idx++) {
           const el = data.elements[idx];
           const elId = el.id && typeof el.id === 'string' && el.id.trim() !== '' ? el.id : null;
-
+          
           if (elId && oldElementNameById[elId]) {
-            renamedMap.push({
+            // This element existed before - it might have been renamed or updated
+            renamedElements.push({
               oldName: oldElementNameById[elId],
               newName: el.name,
               quantity: el.quantity,
@@ -110,6 +111,7 @@ export async function saveStandType(id: string | undefined, data: any) {
               sortOrder: idx,
             });
           } else {
+            // Completely new element
             brandNewElements.push({
               name: el.name,
               quantity: el.quantity,
@@ -120,12 +122,13 @@ export async function saveStandType(id: string | undefined, data: any) {
           }
         }
 
-        // Old names that were removed from template
+        // Names of elements that should remain (after rename)
         const deletedOldNames = Object.values(oldElementNameById).filter(
-          oldName => !renamedMap.some(r => r.oldName === oldName)
+          oldName => !renamedElements.some(r => r.oldName === oldName)
         );
 
         for (const stand of stands) {
+          // Get current stand elements
           const { data: standElements } = await supabaseAdmin
             .from('stand_elements')
             .select('id, name')
@@ -133,41 +136,31 @@ export async function saveStandType(id: string | undefined, data: any) {
 
           if (!standElements) continue;
 
-          // 1. Delete removed elements
+          // Delete elements whose template was removed
           if (deletedOldNames.length > 0) {
-            const idsToDelete = standElements
-              .filter(se => deletedOldNames.includes(se.name))
-              .map(se => se.id);
+            const idsToDelete = standElements.filter(se => deletedOldNames.includes(se.name)).map(se => se.id);
             if (idsToDelete.length > 0) {
               await supabaseAdmin.from('stand_elements').delete().in('id', idsToDelete);
             }
           }
 
-          // 2. Update existing elements (name, quantity, sort_order, and description if column exists)
-          for (const mapped of renamedMap) {
-            const match = standElements.find(se => se.name === mapped.oldName);
-            if (match) {
-              const updatePayload: Record<string, any> = {
-                name: mapped.newName,
-                quantity: mapped.quantity,
-                sort_order: mapped.sortOrder,
-              };
-              // Try to update description - some schemas may use 'description', others 'notes'
-              if (mapped.description !== undefined) {
-                updatePayload.description = mapped.description;
-              }
-              await supabaseAdmin.from('stand_elements').update(updatePayload).eq('id', match.id);
+          // Update existing elements (rename + update quantity/description/sort_order)
+          for (const renamed of renamedElements) {
+            const matchingStandEl = standElements.find(se => se.name === renamed.oldName);
+            if (matchingStandEl) {
+              await supabaseAdmin.from('stand_elements').update({
+                name: renamed.newName,
+                quantity: renamed.quantity,
+                description: renamed.description,
+                sort_order: renamed.sortOrder,
+              }).eq('id', matchingStandEl.id);
             }
           }
 
-          // 3. Insert brand new elements
+          // Add brand new elements
           if (brandNewElements.length > 0) {
-            const currentNames = standElements.map(se => se.name);
-            // Also account for elements we just renamed
-            const renamedNewNames = renamedMap.map(r => r.newName);
-            const allCurrentNames = [...currentNames.filter(n => !deletedOldNames.includes(n)), ...renamedNewNames];
-            
-            const toInsert = brandNewElements.filter(ne => !allCurrentNames.includes(ne.name));
+            const existingNames = standElements.map(se => se.name);
+            const toInsert = brandNewElements.filter(ne => !existingNames.includes(ne.name));
             if (toInsert.length > 0) {
               await supabaseAdmin.from('stand_elements').insert(
                 toInsert.map(ne => ({
@@ -183,11 +176,10 @@ export async function saveStandType(id: string | undefined, data: any) {
           }
         }
 
-        // Revalidate all affected company pages
+        // Revalidate all company pages
         for (const stand of stands) {
           revalidatePath(`/admin/empresas/${stand.company_id}`);
         }
-        revalidatePath('/home/stand');
       }
     }
 
