@@ -64,6 +64,7 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'elements',
+    keyName: 'fieldId', // Prevents React Hook Form from overwriting the DB 'id' field
   });
 
   const generalPhoto = watch('default_general_photo_url');
@@ -171,7 +172,8 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
         </CardHeader>
         <CardContent className="space-y-6">
           {fields.map((field, index) => (
-            <div key={field.id} className="p-4 border border-neutral-200 rounded-lg flex items-start gap-4">
+            <div key={field.fieldId} className="p-4 border border-neutral-200 rounded-lg flex items-start gap-4">
+              <input type="hidden" {...register(`elements.${index}.id`)} />
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Nombre del elemento *</Label>

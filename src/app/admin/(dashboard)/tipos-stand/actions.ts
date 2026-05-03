@@ -151,7 +151,7 @@ export async function saveStandType(id: string | undefined, data: any) {
               await supabaseAdmin.from('stand_elements').update({
                 name: renamed.newName,
                 quantity: renamed.quantity,
-                description: renamed.description,
+                notes: renamed.description,
                 sort_order: renamed.sortOrder,
               }).eq('id', matchingStandEl.id);
             }
@@ -167,7 +167,7 @@ export async function saveStandType(id: string | undefined, data: any) {
                   stand_id: stand.id,
                   name: ne.name,
                   quantity: ne.quantity,
-                  description: ne.description,
+                  notes: ne.description,
                   delivery_photo_url: ne.deliveryPhotoUrl,
                   sort_order: ne.sortOrder,
                 }))
