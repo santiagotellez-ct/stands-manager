@@ -71,7 +71,7 @@ export async function assignStandType(companyId: string, typeId: string, returnD
     const standId = data;
     const { data: templateChecklist } = await supabaseAdmin
       .from('stand_type_checklist_items')
-      .select('title, sort_order')
+      .select('title, description, sort_order')
       .eq('stand_type_id', typeId);
 
     if (templateChecklist && templateChecklist.length > 0) {
@@ -79,6 +79,7 @@ export async function assignStandType(companyId: string, typeId: string, returnD
         templateChecklist.map(item => ({
           stand_id: standId,
           title: item.title,
+          description: item.description,
           sort_order: item.sort_order,
         }))
       );

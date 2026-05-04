@@ -11,6 +11,7 @@ interface ChecklistItem {
   id: string;
   stand_id: string;
   title: string;
+  description?: string | null;
   is_checked: boolean;
   sort_order: number;
 }
@@ -41,16 +42,24 @@ export function ChecklistSection({ items, standId, readOnly = false }: { items: 
       <h3 className="text-xl font-semibold mb-4">Elementos del stand</h3>
       <div className="space-y-4">
         {items.map(item => (
-          <div key={item.id} className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${item.is_checked ? 'bg-green-50/50 border-green-200' : 'bg-neutral-50/50 border-neutral-200'}`}>
+          <div key={item.id} className={`flex items-start space-x-3 p-3 rounded-lg border transition-colors ${item.is_checked ? 'bg-green-50/50 border-green-200' : 'bg-neutral-50/50 border-neutral-200'}`}>
             <Checkbox 
               id={`check-${item.id}`} 
               checked={item.is_checked} 
               disabled={loadingItems[item.id] || readOnly}
-              onCheckedChange={(checked) => handleToggle(item.id, checked as boolean)} 
+              onCheckedChange={(checked) => handleToggle(item.id, checked as boolean)}
+              className="mt-0.5"
             />
-            <Label htmlFor={`check-${item.id}`} className={`flex-1 ${!readOnly && !loadingItems[item.id] ? 'cursor-pointer' : ''} text-sm font-medium ${item.is_checked ? 'text-neutral-500 line-through' : 'text-neutral-900'}`}>
-              {item.title}
-            </Label>
+            <div className="flex-1">
+              <Label htmlFor={`check-${item.id}`} className={`${!readOnly && !loadingItems[item.id] ? 'cursor-pointer' : ''} text-sm font-medium ${item.is_checked ? 'text-neutral-500 line-through' : 'text-neutral-900'}`}>
+                {item.title}
+              </Label>
+              {item.description && (
+                <p className={`text-xs mt-0.5 ${item.is_checked ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                  {item.description}
+                </p>
+              )}
+            </div>
           </div>
         ))}
       </div>

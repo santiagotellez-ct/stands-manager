@@ -116,6 +116,7 @@ export async function saveStandType(id: string | undefined, data: any) {
         const payload: any = {
           stand_type_id: typeId,
           title: c.title,
+          description: c.description || null,
           sort_order: idx,
         };
         if (c.id && typeof c.id === 'string' && c.id.trim() !== '') {
@@ -169,16 +170,16 @@ export async function saveStandType(id: string | undefined, data: any) {
           }
         }
 
-        const renamedChecklists: Array<{ oldTitle: string; newTitle: string; sortOrder: number }> = [];
-        const brandNewChecklists: Array<{ title: string; sortOrder: number }> = [];
+        const renamedChecklists: Array<{ oldTitle: string; newTitle: string; description: string | null; sortOrder: number }> = [];
+        const brandNewChecklists: Array<{ title: string; description: string | null; sortOrder: number }> = [];
 
         for (let idx = 0; idx < (data.checklist?.length || 0); idx++) {
           const c = data.checklist[idx];
           const cId = c.id && typeof c.id === 'string' && c.id.trim() !== '' ? c.id : null;
           if (cId && oldChecklistTitleById[cId]) {
-            renamedChecklists.push({ oldTitle: oldChecklistTitleById[cId], newTitle: c.title, sortOrder: idx });
+            renamedChecklists.push({ oldTitle: oldChecklistTitleById[cId], newTitle: c.title, description: c.description || null, sortOrder: idx });
           } else {
-            brandNewChecklists.push({ title: c.title, sortOrder: idx });
+            brandNewChecklists.push({ title: c.title, description: c.description || null, sortOrder: idx });
           }
         }
 
@@ -258,6 +259,7 @@ export async function saveStandType(id: string | undefined, data: any) {
               if (matching) {
                 await supabaseAdmin.from('stand_checklist_items').update({
                   title: renamed.newTitle,
+                  description: renamed.description,
                   sort_order: renamed.sortOrder,
                 }).eq('id', matching.id);
               }
@@ -271,6 +273,7 @@ export async function saveStandType(id: string | undefined, data: any) {
                   toInsert.map(nc => ({
                     stand_id: stand.id,
                     title: nc.title,
+                    description: nc.description,
                     sort_order: nc.sortOrder,
                   }))
                 );
@@ -278,11 +281,12 @@ export async function saveStandType(id: string | undefined, data: any) {
             }
           } else if (brandNewChecklists.length > 0 || renamedChecklists.length > 0) {
             // If stand had no checklist at all, but template added some, insert them all
-            const allToCheck = [...renamedChecklists.map(c => ({ title: c.newTitle, sortOrder: c.sortOrder })), ...brandNewChecklists];
+            const allToCheck = [...renamedChecklists.map(c => ({ title: c.newTitle, description: c.description, sortOrder: c.sortOrder })), ...brandNewChecklists];
             await supabaseAdmin.from('stand_checklist_items').insert(
               allToCheck.map(nc => ({
                 stand_id: stand.id,
                 title: nc.title,
+                description: nc.description,
                 sort_order: nc.sortOrder,
               }))
             );

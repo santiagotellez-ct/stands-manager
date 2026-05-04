@@ -26,6 +26,7 @@ const elementSchema = z.object({
 const checklistSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(1, 'El título es requerido'),
+  description: z.string().nullable().optional(),
 });
 
 const standTypeSchema = z.object({
@@ -64,7 +65,7 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
       description: '',
       notes: '',
       elements: [{ name: '', quantity: 1, description: '' }],
-      checklist: [{ title: '' }],
+      checklist: [{ title: '', description: '' }],
     },
   });
 
@@ -223,18 +224,25 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {checklistFields.map((field, index) => (
-            <div key={field.fieldId} className="flex items-start gap-4">
+            <div key={field.fieldId} className="flex items-start gap-4 p-4 border border-neutral-200 rounded-lg">
               <input type="hidden" {...register(`checklist.${index}.id`)} />
-              <div className="flex-1">
-                <Input {...register(`checklist.${index}.title`)} placeholder="Ej: Estructura instalada" />
-                {errors.checklist?.[index]?.title && <p className="text-sm text-destructive mt-1">{errors.checklist[index]?.title?.message}</p>}
+              <div className="flex-1 space-y-4">
+                <div className="space-y-2">
+                  <Label>Título *</Label>
+                  <Input {...register(`checklist.${index}.title`)} placeholder="Ej: Estructura instalada" />
+                  {errors.checklist?.[index]?.title && <p className="text-sm text-destructive mt-1">{errors.checklist[index]?.title?.message}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label>Descripción (opcional)</Label>
+                  <Textarea {...register(`checklist.${index}.description`)} placeholder="Detalles o instrucciones adicionales para este ítem" rows={2} />
+                </div>
               </div>
-              <Button type="button" variant="ghost" size="icon" onClick={() => removeChecklist(index)} className="text-destructive hover:bg-destructive/10">
+              <Button type="button" variant="ghost" size="icon" onClick={() => removeChecklist(index)} className="text-destructive hover:bg-destructive/10 mt-8">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           ))}
-          <Button type="button" variant="outline" onClick={() => appendChecklist({ title: '' })}>
+          <Button type="button" variant="outline" onClick={() => appendChecklist({ title: '', description: '' })}>
             <Plus className="mr-2 h-4 w-4" /> Agregar elemento (ítem de checklist)
           </Button>
         </CardContent>
