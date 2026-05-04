@@ -2,7 +2,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabaseAdmin } from '@/lib/supabase/admin';
-import { Package, Plus } from 'lucide-react';
+import { Package, Plus, LayoutTemplate } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
