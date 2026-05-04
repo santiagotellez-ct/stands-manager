@@ -2,6 +2,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -36,7 +37,7 @@ export default async function StandDetailPage() {
     .eq('stand_id', stand.id)
     .order('sort_order', { ascending: true });
 
-  const { data: checklistItems } = await supabase
+  const { data: checklistItems } = await supabaseAdmin
     .from('stand_checklist_items')
     .select('*')
     .eq('stand_id', stand.id)
