@@ -1,10 +1,27 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
+
+export async function toggleChecklistItem(itemId: string, isChecked: boolean, standId: string) {
+  try {
+    const { error } = await supabaseAdmin
+      .from('stand_checklist_items')
+      .update({ is_checked: isChecked })
+      .eq('id', itemId);
+
+    if (error) throw error;
+
+    revalidatePath('/home/stand');
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
 
 export async function signStandReception(standId: string, signatureUrl: string) {
   try {
+    const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
     
     // Check if user owns the stand

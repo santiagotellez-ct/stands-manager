@@ -14,7 +14,7 @@ export default async function EditStandTypePage({ params }: { params: Promise<{ 
 
   const { data: standType } = await supabaseAdmin
     .from('stand_types')
-    .select('*, elements:stand_type_elements(*)')
+    .select('*, elements:stand_type_elements(*), checklist:stand_type_checklist_items(*)')
     .eq('id', id)
     .single();
 
@@ -34,7 +34,8 @@ export default async function EditStandTypePage({ params }: { params: Promise<{ 
     default_return_available_at: standType.default_return_available_at 
       ? new Date(standType.default_return_available_at).toISOString().slice(0, 16) 
       : '',
-    elements: standType.elements?.sort((a: any, b: any) => a.sort_order - b.sort_order) || []
+    elements: standType.elements?.sort((a: any, b: any) => a.sort_order - b.sort_order) || [],
+    checklist: standType.checklist?.sort((a: any, b: any) => a.sort_order - b.sort_order) || [{ title: '' }]
   };
 
   const getStatusBadge = (status: string) => {

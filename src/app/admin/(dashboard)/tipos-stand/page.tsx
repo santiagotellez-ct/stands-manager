@@ -63,8 +63,11 @@ export default async function StandTypesPage() {
                 </CardHeader>
                 <CardContent className="flex-1">
                   <div className="flex flex-col gap-2 text-sm text-neutral-600">
-                    <div>
-                      <span className="font-medium text-neutral-900">{type.stand_type_elements?.[0]?.count || 0}</span> elementos
+                    <div className="flex items-center gap-2 text-sm text-neutral-500">
+                      <LayoutTemplate className="w-4 h-4" />
+                      <span>
+                        <span className="font-medium text-neutral-900">{type.stand_type_elements?.[0]?.count || 0}</span> evidencias
+                      </span>
                     </div>
                     <div>
                       <span className="font-medium text-neutral-900">{type.stands?.[0]?.count || 0}</span> empresas asignadas

@@ -76,7 +76,7 @@ export function ReturnUploadForm({ standId, elements }: { standId: string, eleme
         <div className="flex justify-between items-end mb-2">
           <div>
             <h3 className="font-medium text-neutral-900">Progreso de devolución</h3>
-            <p className="text-sm text-neutral-500">{completedCount} de {totalCount} elementos fotografiados</p>
+            <p className="text-sm text-neutral-500">{completedCount} de {totalCount} evidencias fotografiadas</p>
           </div>
           <span className="text-2xl font-semibold text-brand">{progressPercent}%</span>
         </div>
@@ -85,7 +85,7 @@ export function ReturnUploadForm({ standId, elements }: { standId: string, eleme
         </div>
       </div>
 
-      {/* Lista de elementos */}
+      {/* Lista de evidencias */}
       <div className="space-y-4">
         {elements.map(el => (
           <div key={el.id} className={`flex flex-col sm:flex-row items-start sm:items-center p-4 border rounded-lg transition-colors ${el.return_photo_url ? 'border-green-200 bg-green-50/30' : 'border-neutral-200 bg-white'}`}>
@@ -135,7 +135,7 @@ export function ReturnUploadForm({ standId, elements }: { standId: string, eleme
             <AlertDialogHeader>
               <AlertDialogTitle>¿Completar devolución?</AlertDialogTitle>
               <AlertDialogDescription>
-                Asegúrate de que las fotos reflejan el estado real de los elementos al entregarlos. Una vez completado, el proceso se cerrará.
+                Asegúrate de que las fotos reflejan el estado real de las evidencias al entregarlas. Una vez completado, el proceso se cerrará.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

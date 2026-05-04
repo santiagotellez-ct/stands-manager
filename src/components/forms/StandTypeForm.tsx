@@ -23,13 +23,19 @@ const elementSchema = z.object({
   default_delivery_photo_url: z.string().nullable().optional(),
 });
 
+const checklistSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(1, 'El título es requerido'),
+});
+
 const standTypeSchema = z.object({
   name: z.string().min(2, 'Requerido'),
   description: z.string().nullable().optional(),
   default_return_available_at: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   default_general_photo_url: z.string().nullable().optional(),
-  elements: z.array(elementSchema).min(1, 'Agrega al menos un elemento'),
+  elements: z.array(elementSchema).min(1, 'Agrega al menos una evidencia'),
+  checklist: z.array(checklistSchema).optional(),
 });
 
 type StandTypeFormValues = z.infer<typeof standTypeSchema>;
@@ -58,6 +64,7 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
       description: '',
       notes: '',
       elements: [{ name: '', quantity: 1, description: '' }],
+      checklist: [{ title: '' }],
     },
   });
 
@@ -65,6 +72,12 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
     control,
     name: 'elements',
     keyName: 'fieldId', // Prevents React Hook Form from overwriting the DB 'id' field
+  });
+
+  const { fields: checklistFields, append: appendChecklist, remove: removeChecklist } = useFieldArray({
+    control,
+    name: 'checklist',
+    keyName: 'fieldId',
   });
 
   const generalPhoto = watch('default_general_photo_url');
@@ -164,11 +177,11 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
         </CardContent>
       </Card>
 
-      {/* Elementos plantilla */}
+      {/* Evidencias plantilla */}
       <Card>
         <CardHeader>
-          <CardTitle>Elementos del stand</CardTitle>
-          <p className="text-sm text-neutral-500">Define los elementos que se entregarán con este tipo de stand.</p>
+          <CardTitle>Evidencias del stand</CardTitle>
+          <p className="text-sm text-neutral-500">Define las evidencias que se entregarán con este tipo de stand.</p>
         </CardHeader>
         <CardContent className="space-y-6">
           {fields.map((field, index) => (
@@ -176,7 +189,7 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
               <input type="hidden" {...register(`elements.${index}.id`)} />
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Nombre del elemento *</Label>
+                  <Label>Nombre de la evidencia *</Label>
                   <Input {...register(`elements.${index}.name`)} placeholder="Ej: Mesa, Silla, Pantalla" />
                   {errors.elements?.[index]?.name && <p className="text-sm text-destructive">{errors.elements[index]?.name?.message}</p>}
                 </div>
@@ -187,7 +200,7 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label>Descripción (opcional)</Label>
-                  <Input {...register(`elements.${index}.description`)} placeholder="Detalles del elemento" />
+                  <Input {...register(`elements.${index}.description`)} placeholder="Detalles de la evidencia" />
                 </div>
               </div>
               <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="text-destructive hover:bg-destructive/10 mt-6">
@@ -197,7 +210,32 @@ export function StandTypeForm({ initialData }: StandTypeFormProps) {
           ))}
           {errors.elements?.root && <p className="text-sm text-destructive">{errors.elements.root.message}</p>}
           <Button type="button" variant="outline" onClick={() => append({ name: '', quantity: 1, description: '' })}>
-            <Plus className="mr-2 h-4 w-4" /> Agregar elemento
+            <Plus className="mr-2 h-4 w-4" /> Agregar evidencia
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Checklist plantilla */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Elementos del stand (Checklist)</CardTitle>
+          <p className="text-sm text-neutral-500">Define los ítems del stand que se podrán marcar como completados.</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {checklistFields.map((field, index) => (
+            <div key={field.fieldId} className="flex items-start gap-4">
+              <input type="hidden" {...register(`checklist.${index}.id`)} />
+              <div className="flex-1">
+                <Input {...register(`checklist.${index}.title`)} placeholder="Ej: Estructura instalada" />
+                {errors.checklist?.[index]?.title && <p className="text-sm text-destructive mt-1">{errors.checklist[index]?.title?.message}</p>}
+              </div>
+              <Button type="button" variant="ghost" size="icon" onClick={() => removeChecklist(index)} className="text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          <Button type="button" variant="outline" onClick={() => appendChecklist({ title: '' })}>
+            <Plus className="mr-2 h-4 w-4" /> Agregar elemento (ítem de checklist)
           </Button>
         </CardContent>
       </Card>

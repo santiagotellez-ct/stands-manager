@@ -59,8 +59,8 @@ export default async function ReturnPage() {
   return (
     <div className="max-w-[800px] mx-auto pb-20">
       <PageHeader 
-        title="Devolución del stand" 
-        description="Sube una foto del estado final de cada elemento para completar la entrega"
+        title="Proceso de devolución" 
+        description="Sube una foto del estado final de cada evidencia para completar la entrega"
         action={
           <Link href="/home">
             <Button variant="outline">Cancelar</Button>

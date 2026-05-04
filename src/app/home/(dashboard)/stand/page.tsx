@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { SignatureSection } from '@/components/company/SignatureSection';
 import { ElementDetailList } from '@/components/company/ElementDetailList';
+import { ChecklistSection } from '@/components/company/ChecklistSection';
 
 export const revalidate = 0;
 
@@ -35,6 +36,12 @@ export default async function StandDetailPage() {
     .eq('stand_id', stand.id)
     .order('sort_order', { ascending: true });
 
+  const { data: checklistItems } = await supabase
+    .from('stand_checklist_items')
+    .select('*')
+    .eq('stand_id', stand.id)
+    .order('sort_order', { ascending: true });
+
   return (
     <div className="max-w-[1000px] mx-auto pb-20 space-y-8">
       <PageHeader 
@@ -54,9 +61,14 @@ export default async function StandDetailPage() {
         </div>
       )}
 
-      {/* Elementos */}
-      <div>
-        <h3 className="text-xl font-semibold mb-4">Elementos incluidos</h3>
+      {/* Elementos Checklist */}
+      {checklistItems && checklistItems.length > 0 && (
+        <ChecklistSection items={checklistItems} standId={stand.id} />
+      )}
+
+      {/* Evidencias */}
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+        <h3 className="text-xl font-semibold mb-4">Evidencias del stand</h3>
         <ElementDetailList elements={elements || []} />
       </div>
 

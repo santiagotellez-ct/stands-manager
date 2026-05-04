@@ -15,7 +15,7 @@ export async function completeReturn(standId: string) {
     if (rpcError) throw rpcError;
 
     if (pendingCount > 0) {
-      return { error: `Faltan ${pendingCount} fotos de elementos por subir.` };
+      return { error: `Faltan ${pendingCount} fotos de evidencias por subir.` };
     }
 
     // Update returned_at

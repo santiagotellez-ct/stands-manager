@@ -70,7 +70,7 @@ export function SignatureSection({ standId }: { standId: string }) {
       <CardHeader>
         <CardTitle>Confirmar recepción del stand</CardTitle>
         <p className="text-sm text-neutral-500">
-          Al firmar, confirmas que has recibido el stand con todos los elementos en el estado mostrado en las fotos.
+          Al firmar, confirmas que has recibido el stand con todas las evidencias en el estado mostrado en las fotos.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -97,7 +97,7 @@ export function SignatureSection({ standId }: { standId: string }) {
               <AlertDialogHeader>
                 <AlertDialogTitle>¿Confirmar recepción?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Estás a punto de firmar y aceptar formalmente la entrega del stand y todos sus elementos en el estado actual. Esta acción no se puede deshacer.
+                  Estás a punto de firmar y aceptar formalmente la entrega del stand y todas sus evidencias en el estado actual. Esta acción no se puede deshacer.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

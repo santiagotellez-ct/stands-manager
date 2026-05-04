@@ -67,8 +67,25 @@ export async function assignStandType(companyId: string, typeId: string, returnD
 
     if (error) throw error;
     
+    // Copy checklist items from template to the new stand instance
+    const standId = data;
+    const { data: templateChecklist } = await supabaseAdmin
+      .from('stand_type_checklist_items')
+      .select('title, sort_order')
+      .eq('stand_type_id', typeId);
+
+    if (templateChecklist && templateChecklist.length > 0) {
+      await supabaseAdmin.from('stand_checklist_items').insert(
+        templateChecklist.map(item => ({
+          stand_id: standId,
+          title: item.title,
+          sort_order: item.sort_order,
+        }))
+      );
+    }
+
     revalidatePath(`/admin/empresas/${companyId}`);
-    return { success: true, standId: data };
+    return { success: true, standId };
   } catch (error: any) {
     return { error: error.message };
   }
@@ -76,6 +93,8 @@ export async function assignStandType(companyId: string, typeId: string, returnD
 
 export async function unassignStand(standId: string, companyId: string) {
   try {
+    await supabaseAdmin.from('stand_elements').delete().eq('stand_id', standId);
+    await supabaseAdmin.from('stand_checklist_items').delete().eq('stand_id', standId);
     const { error } = await supabaseAdmin.from('stands').delete().eq('id', standId);
     if (error) throw error;
     
@@ -93,6 +112,7 @@ export async function deleteCompany(id: string) {
     if (stands && stands.length > 0) {
       const standIds = stands.map(s => s.id);
       await supabaseAdmin.from('stand_elements').delete().in('stand_id', standIds);
+      await supabaseAdmin.from('stand_checklist_items').delete().in('stand_id', standIds);
     }
 
     // 2. Delete stands owned by this company

@@ -23,8 +23,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { unassignStand, updateReturnDate } from '@/app/admin/(dashboard)/empresas/[id]/actions';
 import { AdminSignatureSection } from '@/components/admin/company/AdminSignatureSection';
+import { ChecklistSection } from '@/components/company/ChecklistSection';
 
-export function StandDetailCard({ companyId, stand, status, elements }: { companyId: string, stand: any, status: string, elements: any[] }) {
+export function StandDetailCard({ companyId, stand, status, elements, checklistItems }: { companyId: string, stand: any, status: string, elements: any[], checklistItems?: any[] }) {
   const supabase = createClient();
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
@@ -158,7 +159,7 @@ export function StandDetailCard({ companyId, stand, status, elements }: { compan
                 <AlertDialogHeader>
                   <AlertDialogTitle>¿Desasignar stand?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esto borrará la instancia del stand y todos los elementos asociados para esta empresa. Esta acción no se puede deshacer.
+                    Esto borrará la instancia del stand y todas las evidencias y elementos asociados para esta empresa. Esta acción no se puede deshacer.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -248,10 +249,15 @@ export function StandDetailCard({ companyId, stand, status, elements }: { compan
         </CardContent>
       </Card>
 
-      {/* Elementos */}
+      {/* Checklist */}
+      {checklistItems && checklistItems.length > 0 && (
+        <ChecklistSection items={checklistItems} standId={stand.id} />
+      )}
+
+      {/* Evidencias */}
       <Card>
         <CardHeader>
-          <CardTitle>Elementos del stand</CardTitle>
+          <CardTitle>Evidencias del stand</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

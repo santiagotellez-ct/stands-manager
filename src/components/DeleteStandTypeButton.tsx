@@ -65,7 +65,7 @@ export function DeleteStandTypeButton({ id, standsCount }: { id: string; standsC
         <AlertDialogHeader>
           <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción eliminará permanentemente este tipo de stand y todos sus elementos plantilla.
+            Esta acción eliminará permanentemente este tipo de stand y todas sus evidencias y elementos plantilla.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

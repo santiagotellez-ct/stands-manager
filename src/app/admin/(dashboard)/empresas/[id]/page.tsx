@@ -54,6 +54,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
 
   // Fetch elements for the stand if it exists
   let standElements = [];
+  let checklistItems = [];
   if (stand) {
     const { data: elements } = await supabaseAdmin
       .from('stand_elements')
@@ -63,6 +64,16 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
     
     if (elements) {
       standElements = elements;
+    }
+
+    const { data: checklist } = await supabaseAdmin
+      .from('stand_checklist_items')
+      .select('*')
+      .eq('stand_id', stand.id)
+      .order('sort_order', { ascending: true });
+
+    if (checklist) {
+      checklistItems = checklist;
     }
   }
 
@@ -81,10 +92,11 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
         <AssignStandCard companyId={companyId} standTypes={standTypes || []} />
       ) : (
         <StandDetailCard 
-          companyId={companyId} 
+          companyId={company.id} 
           stand={stand} 
-          status={computedStatus} 
-          elements={standElements} 
+          status={computedStatus || stand.status}
+          elements={standElements}
+          checklistItems={checklistItems}
         />
       )}
 
