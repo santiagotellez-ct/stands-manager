@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
-export async function completeReturn(standId: string) {
+export async function completeReturn(standId: string, signatureUrl: string, name: string, role: string) {
   try {
     const supabase = await createClient();
     
@@ -18,9 +18,12 @@ export async function completeReturn(standId: string) {
       return { error: `Faltan ${pendingCount} fotos de evidencias por subir.` };
     }
 
-    // Update returned_at
+    // Update returned_at and signature details
     const { error: updateError } = await supabase.from('stands').update({
-      returned_at: new Date().toISOString()
+      returned_at: new Date().toISOString(),
+      return_signature_url: signatureUrl,
+      return_signature_name: name,
+      return_signature_role: role
     }).eq('id', standId);
 
     if (updateError) throw updateError;

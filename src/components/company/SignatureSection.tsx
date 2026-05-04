@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
 import { useRef, useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import SignatureCanvas from 'react-signature-canvas';
 import { toast } from 'sonner';
 import { signStandReception } from '@/app/home/(dashboard)/stand/actions';
@@ -19,8 +21,10 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-export function SignatureSection({ standId }: { standId: string }) {
+export function SignatureSection({ standId, checklistItems }: { standId: string, checklistItems?: any[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
   const signatureRef = useRef<SignatureCanvas>(null);
   const supabase = createClient();
 
@@ -29,6 +33,11 @@ export function SignatureSection({ standId }: { standId: string }) {
   };
 
   const handleSign = async () => {
+    if (!name.trim() || !role.trim()) {
+      toast.error('Datos incompletos', { description: 'Por favor ingresa tu nombre y cargo.' });
+      return;
+    }
+
     if (signatureRef.current?.isEmpty()) {
       toast.error('Firma requerida', { description: 'Por favor, firma en el recuadro antes de confirmar.' });
       return;
@@ -54,7 +63,7 @@ export function SignatureSection({ standId }: { standId: string }) {
       const { data: { publicUrl } } = supabase.storage.from('stand-photos').getPublicUrl(path);
 
       // Save in DB
-      const result = await signStandReception(standId, publicUrl);
+      const result = await signStandReception(standId, publicUrl, name, role);
       if (result.error) throw new Error(result.error);
 
       toast.success('Recepción confirmada', { description: 'Gracias por firmar la recepción de tu stand.' });
@@ -70,16 +79,49 @@ export function SignatureSection({ standId }: { standId: string }) {
       <CardHeader>
         <CardTitle>Confirmar recepción del stand</CardTitle>
         <p className="text-sm text-neutral-500">
-          Al firmar, confirmas que has recibido el stand con todas las evidencias en el estado mostrado en las fotos.
+          Al firmar, confirmas que has recibido el stand con todas las evidencias en el estado mostrado en las fotos y que todos los ítems del checklist están completos.
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px]">
-          <SignatureCanvas 
-            ref={signatureRef}
-            penColor="black"
-            canvasProps={{ className: 'w-full h-full' }}
-          />
+      <CardContent className="space-y-6">
+        {checklistItems && checklistItems.length > 0 && checklistItems.some(i => !i.is_checked) && (
+          <div className="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-md text-sm">
+            <strong>Atención:</strong> Faltan ítems por verificar en la sección "Elementos del stand". Debes marcarlos todos como completados antes de poder firmar la recepción.
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Nombre de quien recibe *</Label>
+            <Input 
+              placeholder="Ej: Juan Pérez" 
+              value={name} 
+              onChange={e => setName(e.target.value)} 
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Cargo / Rol *</Label>
+            <Input 
+              placeholder="Ej: Coordinador de Marketing" 
+              value={role} 
+              onChange={e => setRole(e.target.value)} 
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Firma *</Label>
+          <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px] relative">
+            {(checklistItems && checklistItems.some(i => !i.is_checked)) && (
+              <div className="absolute inset-0 z-10 bg-neutral-100/60 cursor-not-allowed" title="Completa el checklist primero" />
+            )}
+            <SignatureCanvas 
+              ref={signatureRef}
+              penColor="black"
+              canvasProps={{ className: 'w-full h-full' }}
+            />
+          </div>
         </div>
         
         <div className="flex gap-2">
@@ -89,7 +131,10 @@ export function SignatureSection({ standId }: { standId: string }) {
           
           <AlertDialog>
             <AlertDialogTrigger render={
-              <Button className="bg-brand hover:bg-brand-hover text-white" disabled={isSubmitting}>
+              <Button 
+                className="bg-brand hover:bg-brand-hover text-white" 
+                disabled={isSubmitting || !name.trim() || !role.trim() || (checklistItems && checklistItems.some(i => !i.is_checked))}
+              >
                 Confirmar recepción
               </Button>
             } />

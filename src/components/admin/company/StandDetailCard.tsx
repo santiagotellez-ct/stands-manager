@@ -217,6 +217,11 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
               )}
               <div>
                 <p className="font-medium text-neutral-900 mb-1">Stand recibido por la empresa</p>
+                {stand.delivery_signature_name && stand.delivery_signature_role && (
+                  <p className="text-sm text-neutral-700 mb-1">
+                    <strong>Recibido por:</strong> {stand.delivery_signature_name} ({stand.delivery_signature_role})
+                  </p>
+                )}
                 <p className="text-sm text-neutral-500">
                   Firmado el {format(new Date(stand.signed_at), 'dd/MM/yyyy HH:mm')}
                 </p>
@@ -235,11 +240,23 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
         </CardHeader>
         <CardContent>
           {stand.returned_at ? (
-            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-              <p className="font-medium text-green-900 mb-1">Stand devuelto</p>
-              <p className="text-sm text-green-700">
-                Devuelto el {format(new Date(stand.returned_at), 'dd/MM/yyyy HH:mm')}
-              </p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-green-50 p-4 rounded-lg border border-green-200">
+              {stand.return_signature_url && (
+                <div className="bg-white p-2 border border-green-200 rounded-md">
+                  <img src={stand.return_signature_url} alt="Firma de devolución" className="h-20 object-contain" />
+                </div>
+              )}
+              <div>
+                <p className="font-medium text-green-900 mb-1">Stand devuelto</p>
+                {stand.return_signature_name && stand.return_signature_role && (
+                  <p className="text-sm text-green-800 mb-1">
+                    <strong>Entregado por:</strong> {stand.return_signature_name} ({stand.return_signature_role})
+                  </p>
+                )}
+                <p className="text-sm text-green-700">
+                  Devuelto el {format(new Date(stand.returned_at), 'dd/MM/yyyy HH:mm')}
+                </p>
+              </div>
             </div>
           ) : (
             <p className="text-sm text-neutral-500 italic">

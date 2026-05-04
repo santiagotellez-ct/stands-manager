@@ -4,7 +4,10 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 import { CheckCircle2, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import SignatureCanvas from 'react-signature-canvas';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { completeReturn } from '@/app/home/(dashboard)/devolucion/actions';
 import {
@@ -24,6 +27,9 @@ export function ReturnUploadForm({ standId, elements }: { standId: string, eleme
   const supabase = createClient();
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const signatureRef = useRef<SignatureCanvas>(null);
 
   const completedCount = elements.filter(el => el.return_photo_url).length;
   const totalCount = elements.length;
@@ -54,10 +60,41 @@ export function ReturnUploadForm({ standId, elements }: { standId: string, eleme
     }
   };
 
+  const handleClear = () => {
+    signatureRef.current?.clear();
+  };
+
   const handleComplete = async () => {
+    if (!name.trim() || !role.trim()) {
+      toast.error('Datos incompletos', { description: 'Por favor ingresa tu nombre y cargo.' });
+      return;
+    }
+
+    if (signatureRef.current?.isEmpty()) {
+      toast.error('Firma requerida', { description: 'Por favor, firma en el recuadro antes de completar la devolución.' });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const result = await completeReturn(standId);
+      // Get image as blob
+      const canvas = signatureRef.current?.getTrimmedCanvas();
+      if (!canvas) throw new Error('No se pudo obtener la firma');
+      
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Error al procesar la firma');
+
+      // Upload to storage
+      const path = `stands/${standId}/return-signature-${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage.from('stand-photos').upload(path, blob, {
+        contentType: 'image/png',
+      });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('stand-photos').getPublicUrl(path);
+
+      const result = await completeReturn(standId, publicUrl, name, role);
       if (result.error) throw new Error(result.error);
       
       toast.success('Devolución completada', { description: 'Gracias por participar en el evento.' });
@@ -124,10 +161,56 @@ export function ReturnUploadForm({ standId, elements }: { standId: string, eleme
         ))}
       </div>
 
+      {/* Sección de Firma */}
+      <div className="bg-white p-6 rounded-lg border border-neutral-200 space-y-6">
+        <h3 className="font-medium text-neutral-900 mb-2">Firma de devolución</h3>
+        <p className="text-sm text-neutral-500">
+          Por favor, completa tus datos y firma para confirmar la entrega del stand y las evidencias al equipo organizador.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Nombre de quien entrega *</Label>
+            <Input 
+              placeholder="Ej: Juan Pérez" 
+              value={name} 
+              onChange={e => setName(e.target.value)} 
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Cargo / Rol *</Label>
+            <Input 
+              placeholder="Ej: Coordinador de Marketing" 
+              value={role} 
+              onChange={e => setRole(e.target.value)} 
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Firma *</Label>
+          <div className="border border-neutral-300 rounded-lg overflow-hidden bg-neutral-50 w-full max-w-[600px] h-[200px] relative">
+            {!isAllCompleted && (
+              <div className="absolute inset-0 z-10 bg-neutral-100/60 cursor-not-allowed" title="Sube todas las fotos primero" />
+            )}
+            <SignatureCanvas 
+              ref={signatureRef}
+              penColor="black"
+              canvasProps={{ className: 'w-full h-full' }}
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={handleClear} disabled={isSubmitting || !isAllCompleted} className="mt-2">
+            Limpiar firma
+          </Button>
+        </div>
+      </div>
+
       <div className="flex justify-end pt-4">
         <AlertDialog>
           <AlertDialogTrigger render={
-            <Button size="lg" className="bg-brand hover:bg-brand-hover text-white w-full sm:w-auto" disabled={!isAllCompleted || isSubmitting}>
+            <Button size="lg" className="bg-brand hover:bg-brand-hover text-white w-full sm:w-auto" disabled={!isAllCompleted || isSubmitting || !name.trim() || !role.trim()}>
               Completar devolución
             </Button>
           } />
