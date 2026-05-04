@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   AlertDialog,
@@ -115,7 +116,8 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
 
   return (
     <div className="space-y-6">
-      {/* Resumen del stand */}
+
+{/* Resumen del stand */}
       <Card className="bg-brand/5 border-brand/20">
         <CardContent className="pt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -149,32 +151,13 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
               </AlertDialogContent>
             </AlertDialog>
 
-            <AlertDialog>
-              <AlertDialogTrigger render={
-                <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20" disabled={stand.signed_at !== null}>
-                  Desasignar
-                </Button>
-              } />
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>¿Desasignar stand?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esto borrará la instancia del stand y todas las evidencias y elementos asociados para esta empresa. Esta acción no se puede deshacer.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleUnassign} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Desasignar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            
           </div>
         </CardContent>
       </Card>
 
-      {/* Foto general */}
+      
+{/* Foto general */}
       <Card>
         <CardHeader>
           <CardTitle>Foto general de entrega</CardTitle>
@@ -202,76 +185,14 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
         </CardContent>
       </Card>
 
-      {/* Recepción y firma */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recepción de la empresa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {stand.signed_at ? (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-neutral-50 p-4 rounded-lg border border-neutral-200">
-              {stand.delivery_signature_url && (
-                <div className="bg-white p-2 border border-neutral-200 rounded-md">
-                  <img src={stand.delivery_signature_url} alt="Firma" className="h-20 object-contain" />
-                </div>
-              )}
-              <div>
-                <p className="font-medium text-neutral-900 mb-1">Stand recibido por la empresa</p>
-                {stand.delivery_signature_name && stand.delivery_signature_role && (
-                  <p className="text-sm text-neutral-700 mb-1">
-                    <strong>Recibido por:</strong> {stand.delivery_signature_name} ({stand.delivery_signature_role})
-                  </p>
-                )}
-                <p className="text-sm text-neutral-500">
-                  Firmado el {format(new Date(stand.signed_at), 'dd/MM/yyyy HH:mm')}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <AdminSignatureSection standId={stand.id} companyId={companyId} />
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Devolución */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Devolución de la empresa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {stand.returned_at ? (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-green-50 p-4 rounded-lg border border-green-200">
-              {stand.return_signature_url && (
-                <div className="bg-white p-2 border border-green-200 rounded-md">
-                  <img src={stand.return_signature_url} alt="Firma de devolución" className="h-20 object-contain" />
-                </div>
-              )}
-              <div>
-                <p className="font-medium text-green-900 mb-1">Stand devuelto</p>
-                {stand.return_signature_name && stand.return_signature_role && (
-                  <p className="text-sm text-green-800 mb-1">
-                    <strong>Entregado por:</strong> {stand.return_signature_name} ({stand.return_signature_role})
-                  </p>
-                )}
-                <p className="text-sm text-green-700">
-                  Devuelto el {format(new Date(stand.returned_at), 'dd/MM/yyyy HH:mm')}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-neutral-500 italic">
-              Devolución no completada. La empresa podrá completarla a partir del {stand.return_available_at ? format(new Date(stand.return_available_at), 'dd/MM/yyyy HH:mm') : 'la fecha definida'}.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Checklist */}
+      
+{/* Checklist */}
       {checklistItems && checklistItems.length > 0 && (
         <ChecklistSection items={checklistItems} standId={stand.id} />
       )}
 
-      {/* Evidencias */}
+      
+{/* Evidencias */}
       <Card>
         <CardHeader>
           <CardTitle>Evidencias del stand</CardTitle>
@@ -325,6 +246,108 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
           </div>
         </CardContent>
       </Card>
+    
+{/* Recepción y firma */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recepción de la empresa</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {stand.signed_at ? (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-neutral-50 p-4 rounded-lg border border-neutral-200">
+              {stand.delivery_signature_url && (
+                <div className="bg-white p-2 border border-neutral-200 rounded-md">
+                  <img src={stand.delivery_signature_url} alt="Firma" className="h-20 object-contain" />
+                </div>
+              )}
+              <div>
+                <p className="font-medium text-neutral-900 mb-1">Stand recibido por la empresa</p>
+                {stand.delivery_signature_name && stand.delivery_signature_role && (
+                  <p className="text-sm text-neutral-700 mb-1">
+                    <strong>Recibido por:</strong> {stand.delivery_signature_name} ({stand.delivery_signature_role})
+                  </p>
+                )}
+                <p className="text-sm text-neutral-500">
+                  Firmado el {format(new Date(stand.signed_at), 'dd/MM/yyyy HH:mm')}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <AdminSignatureSection standId={stand.id} companyId={companyId} />
+          )}
+        </CardContent>
+      </Card>
+
+      
+{/* Devolución */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Devolución de la empresa</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {stand.returned_at ? (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-green-50 p-4 rounded-lg border border-green-200">
+              {stand.return_signature_url && (
+                <div className="bg-white p-2 border border-green-200 rounded-md">
+                  <img src={stand.return_signature_url} alt="Firma de devolución" className="h-20 object-contain" />
+                </div>
+              )}
+              <div>
+                <p className="font-medium text-green-900 mb-1">Stand devuelto</p>
+                {stand.return_signature_name && stand.return_signature_role && (
+                  <p className="text-sm text-green-800 mb-1">
+                    <strong>Entregado por:</strong> {stand.return_signature_name} ({stand.return_signature_role})
+                  </p>
+                )}
+                <p className="text-sm text-green-700">
+                  Devuelto el {format(new Date(stand.returned_at), 'dd/MM/yyyy HH:mm')}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-neutral-500 italic">
+              Devolución no completada. La empresa podrá completarla a partir del {stand.return_available_at ? format(new Date(stand.return_available_at), 'dd/MM/yyyy HH:mm') : 'la fecha definida'}.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      
+
+      {/* Danger Zone */}
+      <Card className="border-destructive/20 bg-destructive/5">
+        <CardHeader>
+          <CardTitle className="text-destructive flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Opciones de administrador
+          </CardTitle>
+          <p className="text-sm text-neutral-500">Acciones destructivas que afectan a esta empresa.</p>
+        </CardHeader>
+        <CardContent>
+          <AlertDialog>
+            <AlertDialogTrigger render={
+              <Button variant="destructive" className="w-full sm:w-auto" disabled={stand.signed_at !== null}>
+                Desasignar stand de esta empresa
+              </Button>
+            } />
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Desasignar stand?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esto borrará la instancia del stand y todas las evidencias y elementos asociados para esta empresa. Esta acción no se puede deshacer.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleUnassign} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Desasignar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

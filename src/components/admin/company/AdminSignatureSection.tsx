@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
 import { useRef, useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import SignatureCanvas from 'react-signature-canvas';
 import { toast } from 'sonner';
 import { adminSignStandReception } from '@/app/admin/(dashboard)/empresas/[id]/actions';
@@ -21,6 +23,8 @@ import {
 
 export function AdminSignatureSection({ standId, companyId }: { standId: string; companyId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
   const signatureRef = useRef<SignatureCanvas>(null);
   const supabase = createClient();
 
@@ -29,6 +33,11 @@ export function AdminSignatureSection({ standId, companyId }: { standId: string;
   };
 
   const handleSign = async () => {
+    if (!name.trim() || !role.trim()) {
+      toast.error('Datos incompletos', { description: 'Por favor ingresa el nombre y cargo de la persona.' });
+      return;
+    }
+
     if (signatureRef.current?.isEmpty()) {
       toast.error('Firma requerida', { description: 'Por favor, firma en el recuadro antes de confirmar.' });
       return;
@@ -54,7 +63,7 @@ export function AdminSignatureSection({ standId, companyId }: { standId: string;
       const { data: { publicUrl } } = supabase.storage.from('stand-photos').getPublicUrl(path);
 
       // Save in DB via admin action
-      const result = await adminSignStandReception(standId, publicUrl, companyId);
+      const result = await adminSignStandReception(standId, publicUrl, companyId, name, role);
       if (result.error) throw new Error(result.error);
 
       toast.success('Recepción confirmada por admin', { description: 'La firma de recepción ha sido registrada.' });
@@ -73,13 +82,37 @@ export function AdminSignatureSection({ standId, companyId }: { standId: string;
           Como administrador, puedes completar la firma de recepción en nombre de la empresa.
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px]">
-          <SignatureCanvas 
-            ref={signatureRef}
-            penColor="black"
-            canvasProps={{ className: 'w-full h-full' }}
-          />
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Nombre de quien recibe *</Label>
+            <Input 
+              placeholder="Ej: Juan Pérez" 
+              value={name} 
+              onChange={e => setName(e.target.value)} 
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Cargo / Rol *</Label>
+            <Input 
+              placeholder="Ej: Coordinador de Marketing" 
+              value={role} 
+              onChange={e => setRole(e.target.value)} 
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Firma *</Label>
+          <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px]">
+            <SignatureCanvas 
+              ref={signatureRef}
+              penColor="black"
+              canvasProps={{ className: 'w-full h-full' }}
+            />
+          </div>
         </div>
         
         <div className="flex gap-2">
@@ -89,7 +122,7 @@ export function AdminSignatureSection({ standId, companyId }: { standId: string;
           
           <AlertDialog>
             <AlertDialogTrigger render={
-              <Button className="bg-amber-600 hover:bg-amber-700 text-white" disabled={isSubmitting}>
+              <Button className="bg-amber-600 hover:bg-amber-700 text-white" disabled={isSubmitting || !name.trim() || !role.trim()}>
                 Confirmar recepción (Admin)
               </Button>
             } />

@@ -163,10 +163,12 @@ export async function updateStandElementNotes(elementId: string, companyId: stri
   }
 }
 
-export async function adminSignStandReception(standId: string, signatureUrl: string, companyId: string) {
+export async function adminSignStandReception(standId: string, signatureUrl: string, companyId: string, name: string, role: string) {
   try {
     const { error } = await supabaseAdmin.from('stands').update({
       delivery_signature_url: signatureUrl,
+      delivery_signature_name: name,
+      delivery_signature_role: role,
       signed_at: new Date().toISOString()
     }).eq('id', standId);
 
