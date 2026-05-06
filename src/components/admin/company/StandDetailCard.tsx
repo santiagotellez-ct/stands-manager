@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { unassignStand, updateReturnDate } from '@/app/admin/(dashboard)/empresas/[id]/actions';
 import { AdminSignatureSection } from '@/components/admin/company/AdminSignatureSection';
 import { ChecklistSection } from '@/components/company/ChecklistSection';
@@ -32,6 +33,7 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
   const [isUploading, setIsUploading] = useState(false);
   const [returnDate, setReturnDate] = useState(stand.return_available_at ? new Date(stand.return_available_at).toISOString().slice(0, 16) : '');
   const [isUpdatingDate, setIsUpdatingDate] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handleGeneralPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -165,12 +167,17 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
         <CardContent>
           {stand.general_photo_url ? (
             <div className="space-y-4">
-              <img src={stand.general_photo_url} alt="Foto general" className="w-full max-w-md aspect-video object-cover rounded-lg border border-neutral-200" />
+              <img 
+                src={stand.general_photo_url} 
+                alt="Foto general" 
+                className="w-full max-w-md aspect-video object-cover rounded-lg border border-neutral-200 cursor-pointer hover:opacity-90 transition-opacity" 
+                onClick={() => setSelectedImage(stand.general_photo_url)}
+              />
               <div className="flex gap-2 items-center">
                 <Button type="button" variant="outline" onClick={() => document.getElementById('general-photo-upload')?.click()} disabled={isUploading}>
                   Cambiar foto
                 </Button>
-                <input id="general-photo-upload" type="file" accept="image/*" className="hidden" onChange={handleGeneralPhotoUpload} />
+                <input id="general-photo-upload" type="file" accept="image/*" capture="environment" className="hidden" onChange={handleGeneralPhotoUpload} />
               </div>
             </div>
           ) : (
@@ -179,7 +186,7 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
               <Button type="button" onClick={() => document.getElementById('general-photo-upload')?.click()} disabled={isUploading}>
                 {isUploading ? 'Subiendo...' : 'Subir foto general'}
               </Button>
-              <input id="general-photo-upload" type="file" accept="image/*" className="hidden" onChange={handleGeneralPhotoUpload} />
+              <input id="general-photo-upload" type="file" accept="image/*" capture="environment" className="hidden" onChange={handleGeneralPhotoUpload} />
             </div>
           )}
         </CardContent>
@@ -215,16 +222,21 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
                     <Label className="text-xs text-neutral-500">Foto Entrega (Tú)</Label>
                     {el.delivery_photo_url ? (
                       <div className="relative group">
-                        <img src={el.delivery_photo_url} alt="Entrega" className="w-full h-32 object-cover rounded-md border border-neutral-200" />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md">
-                          <Button size="sm" variant="secondary" onClick={() => document.getElementById(`upload-del-${el.id}`)?.click()} disabled={isUploading}>Cambiar</Button>
+                        <img 
+                          src={el.delivery_photo_url} 
+                          alt="Entrega" 
+                          className="w-full h-32 object-cover rounded-md border border-neutral-200 cursor-pointer" 
+                          onClick={() => setSelectedImage(el.delivery_photo_url)}
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md pointer-events-none">
+                          <Button size="sm" variant="secondary" onClick={() => document.getElementById(`upload-del-${el.id}`)?.click()} disabled={isUploading} className="pointer-events-auto">Cambiar</Button>
                         </div>
-                        <input id={`upload-del-${el.id}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleElementPhotoUpload(e, el.id)} />
+                        <input id={`upload-del-${el.id}`} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleElementPhotoUpload(e, el.id)} />
                       </div>
                     ) : (
                       <div className="w-full h-32 border border-dashed border-neutral-300 rounded-md flex items-center justify-center bg-neutral-50">
                         <Button size="sm" variant="outline" onClick={() => document.getElementById(`upload-del-${el.id}`)?.click()} disabled={isUploading}>Subir foto</Button>
-                        <input id={`upload-del-${el.id}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleElementPhotoUpload(e, el.id)} />
+                        <input id={`upload-del-${el.id}`} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleElementPhotoUpload(e, el.id)} />
                       </div>
                     )}
                   </div>
@@ -233,7 +245,12 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
                   <div className="space-y-2">
                     <Label className="text-xs text-neutral-500">Foto Devolución (Empresa)</Label>
                     {el.return_photo_url ? (
-                      <img src={el.return_photo_url} alt="Devolución" className="w-full h-32 object-cover rounded-md border border-neutral-200" />
+                      <img 
+                        src={el.return_photo_url} 
+                        alt="Devolución" 
+                        className="w-full h-32 object-cover rounded-md border border-neutral-200 cursor-pointer hover:opacity-90 transition-opacity" 
+                        onClick={() => setSelectedImage(el.return_photo_url)}
+                      />
                     ) : (
                       <div className="w-full h-32 border border-neutral-100 bg-neutral-50 rounded-md flex items-center justify-center text-center p-2">
                         <span className="text-xs text-neutral-400">Pendiente de devolución</span>
@@ -273,7 +290,7 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
               </div>
             </div>
           ) : (
-            <AdminSignatureSection standId={stand.id} companyId={companyId} />
+            <AdminSignatureSection standId={stand.id} companyId={companyId} checklistItems={checklistItems} />
           )}
         </CardContent>
       </Card>
@@ -348,6 +365,18 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
         </CardContent>
       </Card>
 
+      {/* Image Viewer Dialog */}
+      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+        <DialogContent className="max-w-4xl bg-black/95 p-0 border-none flex items-center justify-center h-[90vh]">
+          {selectedImage && (
+            <img 
+              src={selectedImage} 
+              alt="Vista ampliada" 
+              className="max-w-full max-h-full object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -20,21 +20,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Lock } from 'lucide-react';
 
-export function AdminSignatureSection({ standId, companyId }: { standId: string; companyId: string }) {
+export function AdminSignatureSection({ standId, companyId, checklistItems = [] }: { standId: string; companyId: string; checklistItems?: any[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const signatureRef = useRef<SignatureCanvas>(null);
   const supabase = createClient();
 
+  const allChecked = checklistItems.length === 0 || checklistItems.every(i => i.is_checked);
+  const isReadyToSign = allChecked && name.trim() !== '' && role.trim() !== '';
+
   const handleClear = () => {
     signatureRef.current?.clear();
   };
 
   const handleSign = async () => {
-    if (!name.trim() || !role.trim()) {
-      toast.error('Datos incompletos', { description: 'Por favor ingresa el nombre y cargo de la persona.' });
+    if (!isReadyToSign) {
+      toast.error('Requisitos incompletos', { description: 'Por favor, marca todos los elementos del checklist y completa el nombre y cargo.' });
       return;
     }
 
@@ -106,7 +110,16 @@ export function AdminSignatureSection({ standId, companyId }: { standId: string;
 
         <div className="space-y-2">
           <Label>Firma *</Label>
-          <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px]">
+          <div className="relative border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px]">
+            {!isReadyToSign && (
+              <div className="absolute inset-0 bg-neutral-100/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-neutral-300 m-2 rounded">
+                <Lock className="h-8 w-8 text-neutral-400 mb-2" />
+                <p className="text-sm font-medium text-neutral-600">Firma bloqueada</p>
+                <p className="text-xs text-neutral-500 mt-1 max-w-[250px]">
+                  Para poder firmar, debes completar el nombre, el cargo y marcar todos los elementos del checklist.
+                </p>
+              </div>
+            )}
             <SignatureCanvas 
               ref={signatureRef}
               penColor="black"
@@ -122,7 +135,7 @@ export function AdminSignatureSection({ standId, companyId }: { standId: string;
           
           <AlertDialog>
             <AlertDialogTrigger render={
-              <Button className="bg-amber-600 hover:bg-amber-700 text-white" disabled={isSubmitting || !name.trim() || !role.trim()}>
+              <Button className="bg-amber-600 hover:bg-amber-700 text-white" disabled={isSubmitting || !isReadyToSign}>
                 Confirmar recepción (Admin)
               </Button>
             } />

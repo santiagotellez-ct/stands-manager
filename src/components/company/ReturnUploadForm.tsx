@@ -155,7 +155,7 @@ export function ReturnUploadForm({ standId, elements }: { standId: string, eleme
                   <Upload className="mr-2 h-4 w-4" /> Subir foto final
                 </Button>
               )}
-              <input id={`ret-${el.id}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, el.id)} />
+              <input id={`ret-${el.id}`} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFileUpload(e, el.id)} />
             </div>
           </div>
         ))}
