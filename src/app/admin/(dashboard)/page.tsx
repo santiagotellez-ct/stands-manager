@@ -1,7 +1,7 @@
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabaseAdmin } from '@/lib/supabase/admin';
-import { Building2, Package, CheckCircle2, Inbox } from 'lucide-react';
+import { Building2, Package, CheckCircle2, Inbox, Send } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -17,10 +17,11 @@ export const revalidate = 0;
 
 export default async function AdminDashboardPage() {
   // Stats
-  const [{ count: typesCount }, { count: companiesCount }, { count: standsCount }, { count: returnedCount }] = await Promise.all([
+  const [{ count: typesCount }, { count: companiesCount }, { count: standsCount }, { count: deliveredCount }, { count: returnedCount }] = await Promise.all([
     supabaseAdmin.from('stand_types').select('*', { count: 'exact', head: true }),
     supabaseAdmin.from('users').select('*', { count: 'exact', head: true }).eq('role', 'company'),
     supabaseAdmin.from('stands').select('*', { count: 'exact', head: true }),
+    supabaseAdmin.from('stands_with_computed_status').select('*', { count: 'exact', head: true }).eq('computed_status', 'delivered'),
     supabaseAdmin.from('stands_with_computed_status').select('*', { count: 'exact', head: true }).eq('computed_status', 'returned'),
   ]);
 
@@ -56,7 +57,7 @@ export default async function AdminDashboardPage() {
     <div>
       <PageHeader title="Dashboard" description="Resumen general del estado de los stands en el evento." />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Tipos de stand</CardTitle>
@@ -82,6 +83,15 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{standsCount || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Stands entregados</CardTitle>
+            <Send className="h-4 w-4 text-neutral-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{deliveredCount || 0}</div>
           </CardContent>
         </Card>
         <Card>
