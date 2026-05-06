@@ -287,10 +287,15 @@ export function StandDetailCard({ companyId, stand, status, elements, checklistI
                 <p className="text-sm text-neutral-500">
                   Firmado el {format(new Date(stand.signed_at), 'dd/MM/yyyy HH:mm')}
                 </p>
+                {stand.delivery_comments && (
+                  <p className="text-sm text-neutral-600 mt-2 bg-white p-3 rounded border border-neutral-200">
+                    <strong>Comentarios:</strong> {stand.delivery_comments}
+                  </p>
+                )}
               </div>
             </div>
           ) : (
-            <AdminSignatureSection standId={stand.id} companyId={companyId} checklistItems={checklistItems} />
+            <AdminSignatureSection standId={stand.id} companyId={companyId} />
           )}
         </CardContent>
       </Card>

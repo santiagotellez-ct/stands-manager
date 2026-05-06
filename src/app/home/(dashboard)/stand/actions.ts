@@ -19,7 +19,7 @@ export async function toggleChecklistItem(itemId: string, isChecked: boolean, st
   }
 }
 
-export async function signStandReception(standId: string, signatureUrl: string, name: string, role: string) {
+export async function signStandReception(standId: string, signatureUrl: string, name: string, role: string, comments?: string) {
   try {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
@@ -35,6 +35,7 @@ export async function signStandReception(standId: string, signatureUrl: string, 
       delivery_signature_url: signatureUrl,
       delivery_signature_name: name,
       delivery_signature_role: role,
+      delivery_comments: comments || null,
       signed_at: new Date().toISOString()
     }).eq('id', standId);
 

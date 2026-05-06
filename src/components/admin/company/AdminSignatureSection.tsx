@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import SignatureCanvas from 'react-signature-canvas';
 import { toast } from 'sonner';
 import { adminSignStandReception } from '@/app/admin/(dashboard)/empresas/[id]/actions';
@@ -22,15 +23,15 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Lock } from 'lucide-react';
 
-export function AdminSignatureSection({ standId, companyId, checklistItems = [] }: { standId: string; companyId: string; checklistItems?: any[] }) {
+export function AdminSignatureSection({ standId, companyId }: { standId: string; companyId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
+  const [comments, setComments] = useState('');
   const signatureRef = useRef<SignatureCanvas>(null);
   const supabase = createClient();
 
-  const allChecked = checklistItems.length === 0 || checklistItems.every(i => i.is_checked);
-  const isReadyToSign = allChecked && name.trim() !== '' && role.trim() !== '';
+  const isReadyToSign = name.trim() !== '' && role.trim() !== '';
 
   const handleClear = () => {
     signatureRef.current?.clear();
@@ -38,7 +39,7 @@ export function AdminSignatureSection({ standId, companyId, checklistItems = [] 
 
   const handleSign = async () => {
     if (!isReadyToSign) {
-      toast.error('Requisitos incompletos', { description: 'Por favor, marca todos los elementos del checklist y completa el nombre y cargo.' });
+      toast.error('Datos incompletos', { description: 'Por favor ingresa el nombre y cargo de la persona.' });
       return;
     }
 
@@ -67,7 +68,7 @@ export function AdminSignatureSection({ standId, companyId, checklistItems = [] 
       const { data: { publicUrl } } = supabase.storage.from('stand-photos').getPublicUrl(path);
 
       // Save in DB via admin action
-      const result = await adminSignStandReception(standId, publicUrl, companyId, name, role);
+      const result = await adminSignStandReception(standId, publicUrl, companyId, name, role, comments);
       if (result.error) throw new Error(result.error);
 
       toast.success('Recepción confirmada por admin', { description: 'La firma de recepción ha sido registrada.' });
@@ -109,6 +110,17 @@ export function AdminSignatureSection({ standId, companyId, checklistItems = [] 
         </div>
 
         <div className="space-y-2">
+          <Label>Comentarios</Label>
+          <Textarea
+            placeholder="Agrega cualquier observación o comentario sobre la entrega del stand..."
+            value={comments}
+            onChange={e => setComments(e.target.value)}
+            disabled={isSubmitting}
+            rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label>Firma *</Label>
           <div className="relative border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px]">
             {!isReadyToSign && (
@@ -116,7 +128,7 @@ export function AdminSignatureSection({ standId, companyId, checklistItems = [] 
                 <Lock className="h-8 w-8 text-neutral-400 mb-2" />
                 <p className="text-sm font-medium text-neutral-600">Firma bloqueada</p>
                 <p className="text-xs text-neutral-500 mt-1 max-w-[250px]">
-                  Para poder firmar, debes completar el nombre, el cargo y marcar todos los elementos del checklist.
+                  Para poder firmar, debes completar el nombre y el cargo.
                 </p>
               </div>
             )}

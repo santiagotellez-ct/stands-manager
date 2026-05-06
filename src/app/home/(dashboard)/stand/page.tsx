@@ -75,7 +75,7 @@ export default async function StandDetailPage() {
 
       {/* Firma */}
       {!stand.signed_at ? (
-        <SignatureSection standId={stand.id} checklistItems={checklistItems || []} />
+        <SignatureSection standId={stand.id} />
       ) : (
         <Card className="bg-neutral-50 border-neutral-200">
           <CardHeader className="pt-8 sm:pt-6">

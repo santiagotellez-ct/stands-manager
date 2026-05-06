@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import SignatureCanvas from 'react-signature-canvas';
 import { toast } from 'sonner';
 import { signStandReception } from '@/app/home/(dashboard)/stand/actions';
@@ -21,10 +22,11 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-export function SignatureSection({ standId, checklistItems }: { standId: string, checklistItems?: any[] }) {
+export function SignatureSection({ standId }: { standId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
+  const [comments, setComments] = useState('');
   const signatureRef = useRef<SignatureCanvas>(null);
   const supabase = createClient();
 
@@ -63,14 +65,14 @@ export function SignatureSection({ standId, checklistItems }: { standId: string,
       const { data: { publicUrl } } = supabase.storage.from('stand-photos').getPublicUrl(path);
 
       // Save in DB
-      const result = await signStandReception(standId, publicUrl, name, role);
+      const result = await signStandReception(standId, publicUrl, name, role, comments);
       if (result.error) throw new Error(result.error);
 
       toast.success('Recepción confirmada', { description: 'Gracias por firmar la recepción de tu stand.' });
       
     } catch (error: any) {
       toast.error('Error al guardar', { description: error.message });
-      setIsSubmitting(false); // Only set false if error, otherwise it navigates/refreshes anyway
+      setIsSubmitting(false);
     }
   };
 
@@ -79,16 +81,10 @@ export function SignatureSection({ standId, checklistItems }: { standId: string,
       <CardHeader>
         <CardTitle>Confirmar recepción del stand</CardTitle>
         <p className="text-sm text-neutral-500">
-          Al firmar, confirmas que has recibido el stand con todas las evidencias en el estado mostrado en las fotos y que todos los ítems del checklist están completos.
+          Al firmar, confirmas que has recibido el stand con todas las evidencias en el estado mostrado en las fotos.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        {checklistItems && checklistItems.length > 0 && checklistItems.some(i => !i.is_checked) && (
-          <div className="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-md text-sm">
-            <strong>Atención:</strong> Faltan ítems por verificar en la sección "Elementos del stand". Debes marcarlos todos como completados antes de poder firmar la recepción.
-          </div>
-        )}
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Nombre de quien recibe *</Label>
@@ -111,11 +107,19 @@ export function SignatureSection({ standId, checklistItems }: { standId: string,
         </div>
 
         <div className="space-y-2">
+          <Label>Comentarios</Label>
+          <Textarea
+            placeholder="Agrega cualquier observación o comentario sobre la recepción del stand..."
+            value={comments}
+            onChange={e => setComments(e.target.value)}
+            disabled={isSubmitting}
+            rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label>Firma *</Label>
-          <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px] relative">
-            {(checklistItems && checklistItems.some(i => !i.is_checked)) && (
-              <div className="absolute inset-0 z-10 bg-neutral-100/60 cursor-not-allowed" title="Completa el checklist primero" />
-            )}
+          <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white w-full max-w-[600px] h-[200px]">
             <SignatureCanvas 
               ref={signatureRef}
               penColor="black"
@@ -133,7 +137,7 @@ export function SignatureSection({ standId, checklistItems }: { standId: string,
             <AlertDialogTrigger render={
               <Button 
                 className="bg-brand hover:bg-brand-hover text-white" 
-                disabled={isSubmitting || !name.trim() || !role.trim() || (checklistItems && checklistItems.some(i => !i.is_checked))}
+                disabled={isSubmitting || !name.trim() || !role.trim()}
               >
                 Confirmar recepción
               </Button>
