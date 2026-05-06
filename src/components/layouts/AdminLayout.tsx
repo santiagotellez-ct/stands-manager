@@ -2,7 +2,7 @@
 
 import { Logo } from '@/components/Logo';
 import { createClient } from '@/lib/supabase/client';
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -26,6 +26,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const supabase = createClient();
   const [userName, setUserName] = useState<string>('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -90,13 +96,50 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Mobile menu trigger could go here */}
-            <button className="md:hidden p-2 -mr-2 text-neutral-500">
-              <Menu className="h-5 w-5" />
+            {/* Mobile menu toggle */}
+            <button 
+              className="md:hidden p-2 -mr-2 text-neutral-500" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menú de navegación"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile Navigation Panel */}
+      {mobileMenuOpen && (
+        <div className="fixed top-16 left-0 right-0 z-[9] bg-white border-b border-neutral-200 shadow-lg md:hidden animate-in slide-in-from-top-2 duration-200">
+          <nav className="max-w-[1280px] mx-auto px-6 py-3 flex flex-col gap-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-brand/10 text-brand'
+                      : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+            <button
+              onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+              className="px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors text-left flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar sesión
+            </button>
+          </nav>
+        </div>
+      )}
+
       <main className="pt-24 md:pt-32 min-h-screen max-w-[1280px] mx-auto p-6">
         {children}
       </main>
